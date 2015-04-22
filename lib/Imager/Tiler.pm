@@ -11,7 +11,7 @@ our @EXPORT_OK = qw(tile);
 use strict;
 use warnings;
 
-our $VERSION = '1.01';
+# VERSION
 
 =pod
 
@@ -178,13 +178,30 @@ minimum width needed to contain the images
 
 L<Imager>
 
+=head1 REPOSITORY
+
+Fork this module on GitHub:
+L<https://github.com/zoffixznet/Imager-Tiler>
+
+=head1 BUGS
+
+To report bugs or request features, please use
+L<https://github.com/zoffixznet/Imager-Tiler/issues>
+
+If you can't access GitHub, you can email your request
+to C<bug-imager-tiler at rt.cpan.org>
+
+=head1 MAINTAINER
+
+Zoffix Znet (zoffix 'at' cpan.org)
+
 =head1 AUTHOR, COPYRIGHT, and LICENSE
 
 Dean Arnold L<mailto:darnold@presicient.com>
 
 Copyright(C) 2007, 2008, Dean Arnold, Presicient Corp., USA.
 
-Permission is granted to use, copy, modify, and redistribute this 
+Permission is granted to use, copy, modify, and redistribute this
 software under the terms of the Academic Free License version 3.0, as specified at the
 Open Source Initiative website L<http://www.opensource.org/licenses/afl-3.0.php>.
 
@@ -392,13 +409,13 @@ sub tile {
 	my $tiled = Imager->new(xsize => $w, ysize => $h, channels => 4)
 		or die "Unable to create image.";
 
-	$background = ref $background 
-		? Imager::Color->new(@$background) 
+	$background = ref $background
+		? Imager::Color->new(@$background)
 		: Imager::Color->new($background);
 	die "Unable to create background color."
 		unless defined $background;
 
-	my $shadow = $args{Shadow} 
+	my $shadow = $args{Shadow}
 		? Imager::Color->new(120, 120, 120, 80)
 		: undef;
 	$tiled->box(box => [ 0,0, $w - 1, $h - 1], color => $background, filled => 1)
@@ -409,7 +426,7 @@ sub tile {
 		$_ = $_->convert(preset => 'addalpha');
 		$w = $coords[$x++];
 		$h = $coords[$x++];
-		$tiled->box(box => [ $w + 9, $h + 9, $w + $_->getwidth() + 9, $h + $_->getheight() + 9], 
+		$tiled->box(box => [ $w + 9, $h + 9, $w + $_->getwidth() + 9, $h + $_->getheight() + 9],
 			color => $shadow, filled => 1)
 			if $shadow;
 		$tiled->rubthrough(src => $_, tx => $w, ty => $h) or die $tiled->errstr();
@@ -419,7 +436,7 @@ sub tile {
 #	can be adjusted to the tiled image's newl location
 #
 	my $imgdata;
-	$tiled->write(data => \$imgdata, type => $format) or 
+	$tiled->write(data => \$imgdata, type => $format) or
 		die $tiled->errstr();
 	return wantarray ? ($imgdata, @coords) : $imgdata;
 }

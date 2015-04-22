@@ -1,2 +1,0 @@
-Vers. 1.01	2007-Dec-25		D. Arnold
-	- ported from GD::Tiler 0.11
