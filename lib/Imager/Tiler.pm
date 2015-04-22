@@ -15,8 +15,7 @@ use warnings;
 
 =pod
 
-=for stopwords EdgeMargin ImagesPerRow PNG RGB TileMargin org zoffix
-HEdgeMargin HTileMargin VEdgeMargin VTileMargin
+=for stopwords EdgeMargin ImagesPerRow PNG RGB TileMargin zoffix HEdgeMargin HTileMargin VEdgeMargin VTileMargin
 
 =head1 NAME
 
