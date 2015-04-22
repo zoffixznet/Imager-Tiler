@@ -15,38 +15,41 @@ use warnings;
 
 =pod
 
+=for stopwords EdgeMargin ImagesPerRow PNG RGB TileMargin org zoffix
+HEdgeMargin HTileMargin VEdgeMargin VTileMargin
+
 =head1 NAME
 
 Imager::Tiler - package to aggregate images into a single tiled image via Imager
 
 =head1 SYNOPSIS
 
-	use Imager::Tiler qw(tile);
-	#
-	#	use computed coordinates for layout, and retrieve the
-	#	coordinates for later use (as imported method)
-	#
-	my ($img, @coords) = tile(
-		Images => [ 'chart1.png', 'chart2.png', 'chart3.png', 'chart4.png'],
-		Background => 'lgray',
-		Center => 1,
-		VEdgeMargin => 10,
-		HEdgeMargin => 10,
-		VTileMargin => 5,
-		HTileMargin => 5);
-	#
-	#	use explicit coordinates for layout (as class method)
-	#
-	my $explimg = Imager::Tiler->tile(
-		Images => [ 'chart1.png', 'chart2.png', 'chart3.png', 'chart4.png'],
-		Background => 'lgray',
-		Width => 500,
-		Height => 500,
-		Coordinates => [
-			10, 10,
-			120, 10,
-			10, 120,
-			120, 120 ]);
+    use Imager::Tiler qw(tile);
+    #
+    #   use computed coordinates for layout, and retrieve the
+    #   coordinates for later use (as imported method)
+    #
+    my ($img, @coords) = tile(
+        Images => [ 'chart1.png', 'chart2.png', 'chart3.png', 'chart4.png'],
+        Background => 'lgray',
+        Center => 1,
+        VEdgeMargin => 10,
+        HEdgeMargin => 10,
+        VTileMargin => 5,
+        HTileMargin => 5);
+    #
+    #   use explicit coordinates for layout (as class method)
+    #
+    my $explimg = Imager::Tiler->tile(
+        Images => [ 'chart1.png', 'chart2.png', 'chart3.png', 'chart4.png'],
+        Background => 'lgray',
+        Width => 500,
+        Height => 500,
+        Coordinates => [
+            10, 10,
+            120, 10,
+            10, 120,
+            120, 120 ]);
 
 =head1 DESCRIPTION
 
@@ -240,204 +243,204 @@ my %colors = (
     transparent => [1,1,1, 0]
 );
 #
-#	compute coordinates for tiled images
+#   compute coordinates for tiled images
 #
 sub _layout {
-	my ($center, $vedge, $hedge, $vtile, $htile, $imgsperrow, $shadow, @images) = @_;
-	my ($rows, $cols);
+    my ($center, $vedge, $hedge, $vtile, $htile, $imgsperrow, $shadow, @images) = @_;
+    my ($rows, $cols);
 
-	my $imgcnt = scalar @images;
-	if (defined($imgsperrow)) {
-		$cols = $imgsperrow;
-		$rows = int($imgcnt/$cols);
-		$rows++
-			unless (($rows * $cols) >= $imgcnt);
-	}
-	else {
-		$rows = $cols = int(sqrt($imgcnt));
-		unless (($rows * $cols) == $imgcnt) {
-			$cols++;
-			$rows++
-				unless (($rows * $cols) >= $imgcnt);
-		}
-	}
+    my $imgcnt = scalar @images;
+    if (defined($imgsperrow)) {
+        $cols = $imgsperrow;
+        $rows = int($imgcnt/$cols);
+        $rows++
+            unless (($rows * $cols) >= $imgcnt);
+    }
+    else {
+        $rows = $cols = int(sqrt($imgcnt));
+        unless (($rows * $cols) == $imgcnt) {
+            $cols++;
+            $rows++
+                unless (($rows * $cols) >= $imgcnt);
+        }
+    }
 #
-#	compute width and height based on input images
+#   compute width and height based on input images
 #
-	my @rowh = ( (0) x $rows );
-	my @colw = ( (0) x $cols );
-	my @coords = ();
-	$shadow = $shadow ? 10 : 0;
-	foreach my $r (0..$rows-1) {
-		$rowh[$r] = 0;
-		foreach my $c (0..$cols - 1) {
-			my $img = ($r * $cols) + $c;
-			last unless $images[$img];
+    my @rowh = ( (0) x $rows );
+    my @colw = ( (0) x $cols );
+    my @coords = ();
+    $shadow = $shadow ? 10 : 0;
+    foreach my $r (0..$rows-1) {
+        $rowh[$r] = 0;
+        foreach my $c (0..$cols - 1) {
+            my $img = ($r * $cols) + $c;
+            last unless $images[$img];
 
-			my $w = $images[$img]->getwidth() + $shadow +
-				((($r == 0) || ($r == $rows - 1)) ? (($vtile >> 1) + $vedge) : $vtile);
-			my $h = $images[$img]->getheight() + $shadow +
-				((($c == 0) || ($c == $cols - 1)) ? (($htile >> 1) + $hedge) : $htile);
+            my $w = $images[$img]->getwidth() + $shadow +
+                ((($r == 0) || ($r == $rows - 1)) ? (($vtile >> 1) + $vedge) : $vtile);
+            my $h = $images[$img]->getheight() + $shadow +
+                ((($c == 0) || ($c == $cols - 1)) ? (($htile >> 1) + $hedge) : $htile);
 
-			$colw[$c] = $w
-				if ($colw[$c] < $w);
-			$rowh[$r] = $h
-				if ($rowh[$r] < $h);
-		}
-	}
+            $colw[$c] = $w
+                if ($colw[$c] < $w);
+            $rowh[$r] = $h
+                if ($rowh[$r] < $h);
+        }
+    }
 #
-#	compute total image size
+#   compute total image size
 #
-	my ($totalw, $totalh) = ($vedge * 2, $hedge * 2);
-	map $totalw += $_, @colw;
-	map $totalh += $_, @rowh;
+    my ($totalw, $totalh) = ($vedge * 2, $hedge * 2);
+    map $totalw += $_, @colw;
+    map $totalh += $_, @rowh;
 #
-#	now compute placement coords
+#   now compute placement coords
 #
-	my ($left, $top) = ($vedge, $hedge);
-	foreach my $r (0..$#rowh) {
-		foreach my $c (0..$#colw) {
-			my $img = ($r * $cols) + $c;
-			last unless $images[$img];
+    my ($left, $top) = ($vedge, $hedge);
+    foreach my $r (0..$#rowh) {
+        foreach my $c (0..$#colw) {
+            my $img = ($r * $cols) + $c;
+            last unless $images[$img];
 
-			if ($center) {
-				push @coords,
-					$left + (($colw[$c] - $images[$img]->getwidth() - $shadow) >> 1),
-					$top  + (($rowh[$r] - $images[$img]->getheight() - $shadow) >> 1);
-			}
-			else {
-				push @coords, $left, $top;
-			}
-			$left += $colw[$c];
-		}
+            if ($center) {
+                push @coords,
+                    $left + (($colw[$c] - $images[$img]->getwidth() - $shadow) >> 1),
+                    $top  + (($rowh[$r] - $images[$img]->getheight() - $shadow) >> 1);
+            }
+            else {
+                push @coords, $left, $top;
+            }
+            $left += $colw[$c];
+        }
 
-		$top += $rowh[$r];
-		$left = $vedge;
-	}
-	return ($totalw, $totalh, @coords);
+        $top += $rowh[$r];
+        $left = $vedge;
+    }
+    return ($totalw, $totalh, @coords);
 }
 
 sub tile {
-	shift if ($_[0] eq 'Imager::Tiler');	# if called as a object, not class, method
-	my %args = @_;
+    shift if ($_[0] eq 'Imager::Tiler');    # if called as a object, not class, method
+    my %args = @_;
 
-	die 'No images specified.'
-		unless $args{Images} && ref $args{Images} &&
-			(ref $args{Images} eq 'ARRAY');
+    die 'No images specified.'
+        unless $args{Images} && ref $args{Images} &&
+            (ref $args{Images} eq 'ARRAY');
 
-	foreach (@{$args{Images}}) {
-		next if (ref $_ && $_->isa('Imager'));
-		my $img = Imager->new;
-		die 'Cannot load image $_:' . $img->errstr()
-			unless $img->read(file => $_);
-		$_ = $img;
-	}
+    foreach (@{$args{Images}}) {
+        next if (ref $_ && $_->isa('Imager'));
+        my $img = Imager->new;
+        die 'Cannot load image $_:' . $img->errstr()
+            unless $img->read(file => $_);
+        $_ = $img;
+    }
 
-	$args{TileMargin} = 0
-		unless exists $args{TileMargin};
+    $args{TileMargin} = 0
+        unless exists $args{TileMargin};
 
-	$args{EdgeMargin} = 0
-		unless exists $args{EdgeMargin};
+    $args{EdgeMargin} = 0
+        unless exists $args{EdgeMargin};
 
-	$args{VEdgeMargin} = $args{EdgeMargin}
-		unless exists $args{VEdgeMargin};
+    $args{VEdgeMargin} = $args{EdgeMargin}
+        unless exists $args{VEdgeMargin};
 
-	$args{HEdgeMargin} = $args{EdgeMargin}
-		unless exists $args{HEdgeMargin};
+    $args{HEdgeMargin} = $args{EdgeMargin}
+        unless exists $args{HEdgeMargin};
 
-	$args{VTileMargin} = $args{TileMargin}
-		unless exists $args{VTileMargin};
+    $args{VTileMargin} = $args{TileMargin}
+        unless exists $args{VTileMargin};
 
-	$args{HTileMargin} = $args{TileMargin}
-		unless exists $args{HTileMargin};
+    $args{HTileMargin} = $args{TileMargin}
+        unless exists $args{HTileMargin};
 
-	my $background = $colors{white};
-	if (exists $args{Background}) {
-		die "Invalid Background $args{Background}."
-			unless exists $colors{$args{Background}} ||
-				($args{Background}=~/^#[0-9a-fA-F]+$/);
-		$background = $colors{$args{Background}} || $args{Background};
-	}
+    my $background = $colors{white};
+    if (exists $args{Background}) {
+        die "Invalid Background $args{Background}."
+            unless exists $colors{$args{Background}} ||
+                ($args{Background}=~/^#[0-9a-fA-F]+$/);
+        $background = $colors{$args{Background}} || $args{Background};
+    }
 
-	$args{Format} = 'png'
-		unless exists $args{Format};
+    $args{Format} = 'png'
+        unless exists $args{Format};
 
-	my $format = lc $args{Format};
+    my $format = lc $args{Format};
 
-	my ($w, $h) = ($args{Width}, $args{Height});
+    my ($w, $h) = ($args{Width}, $args{Height});
 
-	my @coords;
-	if (exists $args{Coordinates}) {
-		die "Width not specified for explicit placement."
-			unless exists $args{Width};
+    my @coords;
+    if (exists $args{Coordinates}) {
+        die "Width not specified for explicit placement."
+            unless exists $args{Width};
 
-		die "Height not specified for explicit placement."
-			unless exists $args{Height};
+        die "Height not specified for explicit placement."
+            unless exists $args{Height};
 
-		@coords = @{$args{Coordinates}};
-		my $imgcnt = scalar @{$args{Images}};
+        @coords = @{$args{Coordinates}};
+        my $imgcnt = scalar @{$args{Images}};
 
-		die "$imgcnt images require " . ($imgcnt * 2) . " coordinates, but only" . scalar @coords . " specified."
-			if ($imgcnt * 2) > scalar @coords;
+        die "$imgcnt images require " . ($imgcnt * 2) . " coordinates, but only" . scalar @coords . " specified."
+            if ($imgcnt * 2) > scalar @coords;
 #
-#	we'll permit more coords than images;
-#	we also permit coords to place images outside the Width/Height
+#   we'll permit more coords than images;
+#   we also permit coords to place images outside the Width/Height
 #
-	}
-	else {
-		($w, $h, @coords) = _layout(
-			$args{Center},
-			$args{VEdgeMargin},
-			$args{HEdgeMargin},
-			$args{VTileMargin},
-			$args{HTileMargin},
-			$args{ImagesPerRow},
-			$args{Shadow},
-			@{$args{Images}});
+    }
+    else {
+        ($w, $h, @coords) = _layout(
+            $args{Center},
+            $args{VEdgeMargin},
+            $args{HEdgeMargin},
+            $args{VTileMargin},
+            $args{HTileMargin},
+            $args{ImagesPerRow},
+            $args{Shadow},
+            @{$args{Images}});
 
-		die "Specified Width $args{Width} less than computed width of $w."
-			if (exists $args{Width}) && ($args{Width} < $w);
+        die "Specified Width $args{Width} less than computed width of $w."
+            if (exists $args{Width}) && ($args{Width} < $w);
 
-		die "Specified Height $args{Height} less than computed height of $h."
-			if (exists $args{Height}) && ($args{Height} < $h);
-	}
+        die "Specified Height $args{Height} less than computed height of $h."
+            if (exists $args{Height}) && ($args{Height} < $h);
+    }
 #
-#	now create and populate the image
-#	(need a way to support truecolor ?)
+#   now create and populate the image
+#   (need a way to support truecolor ?)
 #
-	my $tiled = Imager->new(xsize => $w, ysize => $h, channels => 4)
-		or die "Unable to create image.";
+    my $tiled = Imager->new(xsize => $w, ysize => $h, channels => 4)
+        or die "Unable to create image.";
 
-	$background = ref $background
-		? Imager::Color->new(@$background)
-		: Imager::Color->new($background);
-	die "Unable to create background color."
-		unless defined $background;
+    $background = ref $background
+        ? Imager::Color->new(@$background)
+        : Imager::Color->new($background);
+    die "Unable to create background color."
+        unless defined $background;
 
-	my $shadow = $args{Shadow}
-		? Imager::Color->new(120, 120, 120, 80)
-		: undef;
-	$tiled->box(box => [ 0,0, $w - 1, $h - 1], color => $background, filled => 1)
-		or die $tiled->errstr();
+    my $shadow = $args{Shadow}
+        ? Imager::Color->new(120, 120, 120, 80)
+        : undef;
+    $tiled->box(box => [ 0,0, $w - 1, $h - 1], color => $background, filled => 1)
+        or die $tiled->errstr();
 
-	my $x = 0;
-	foreach (@{$args{Images}}) {
-		$_ = $_->convert(preset => 'addalpha');
-		$w = $coords[$x++];
-		$h = $coords[$x++];
-		$tiled->box(box => [ $w + 9, $h + 9, $w + $_->getwidth() + 9, $h + $_->getheight() + 9],
-			color => $shadow, filled => 1)
-			if $shadow;
-		$tiled->rubthrough(src => $_, tx => $w, ty => $h) or die $tiled->errstr();
-	}
+    my $x = 0;
+    foreach (@{$args{Images}}) {
+        $_ = $_->convert(preset => 'addalpha');
+        $w = $coords[$x++];
+        $h = $coords[$x++];
+        $tiled->box(box => [ $w + 9, $h + 9, $w + $_->getwidth() + 9, $h + $_->getheight() + 9],
+            color => $shadow, filled => 1)
+            if $shadow;
+        $tiled->rubthrough(src => $_, tx => $w, ty => $h) or die $tiled->errstr();
+    }
 #
-#	in array context, returns the coordinates so e.g. any image maps
-#	can be adjusted to the tiled image's newl location
+#   in array context, returns the coordinates so e.g. any image maps
+#   can be adjusted to the tiled image's newl location
 #
-	my $imgdata;
-	$tiled->write(data => \$imgdata, type => $format) or
-		die $tiled->errstr();
-	return wantarray ? ($imgdata, @coords) : $imgdata;
+    my $imgdata;
+    $tiled->write(data => \$imgdata, type => $format) or
+        die $tiled->errstr();
+    return wantarray ? ($imgdata, @coords) : $imgdata;
 }
 
 1;
