@@ -325,7 +325,6 @@ sub tile {
 		unless $args{Images} && ref $args{Images} &&
 			(ref $args{Images} eq 'ARRAY');
 
-	my $imgcnt = 0;
 	foreach (@{$args{Images}}) {
 		next if (ref $_ && $_->isa('Imager'));
 		my $img = Imager->new;
