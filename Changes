@@ -3,6 +3,7 @@ Revision history for Perl extension JavaScript::Minifier.
 1.010001  2015-04-22
     [Changes by ZOFFIX]
     - Converted to Dist::Zilla packaging
+    - Fixed fatal error due to changed Imager interface
 
 1.01  2007-12-25
     - ported from GD::Tiler 0.11

@@ -328,7 +328,7 @@ sub tile {
 	my $imgcnt = 0;
 	foreach (@{$args{Images}}) {
 		next if (ref $_ && $_->isa('Imager'));
-		my $img = Imager->new(channels => 4);
+		my $img = Imager->new;
 		die 'Cannot load image $_:' . $img->errstr()
 			unless $img->read(file => $_);
 		$_ = $img;

@@ -1,2 +1,4 @@
 Imager-Tiler-*
 .build
+result*.png
+results.html
